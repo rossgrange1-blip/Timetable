@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Studio Timetable</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #ffffff;
+    --surface: #f8f9fb;
+    --border: #e4e7ed;
+    --border-strong: #c8cdd8;
+    --text: #0f1117;
+    --text-secondary: #6b7280;
+    --text-muted: #9ca3af;
+    --header-bg: #0f1117;
+    --accent: #2d6a9f;
+
+    --helen-bg: #dbeafe;   --helen-fg: #1d4ed8;   /* bold blue */
+    --sophie-bg: #fce7f3;  --sophie-fg: #be185d;   /* vivid pink */
+    --lydia-bg: #d1fae5;   --lydia-fg: #065f46;    /* deep teal-green */
+    --zoe-bg: #ffedd5;     --zoe-fg: #c2410c;      /* burnt orange */
+    --aimee-bg: #fef9c3;   --aimee-fg: #854d0e;    /* golden yellow */
+    --katie-bg: #ede9fe;   --katie-fg: #6d28d9;    /* purple */
+    --fiona-bg: #cffafe;   --fiona-fg: #0e7490;    /* cyan */
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Outfit', sans-serif;
+    background: linear-gradient(135deg, #dbeafe 0%, #d1fae5 50%, #ede9fe 100%);
+    color: var(--text);
+    padding: 1.25rem 1.5rem 1.5rem;
+    min-height: 100vh;
+  }
+
+  .container {
+    max-width: 1280px;
+    margin: 0 auto;
+    background: rgba(255,255,255,0.88);
+    backdrop-filter: blur(12px);
+    border-radius: 16px;
+    padding: 1.25rem 1.5rem 1.25rem;
+    box-shadow: 0 4px 32px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
+  }
+
+  header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    border-bottom: 2px solid var(--text);
+    padding-bottom: 0.65rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .studio-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.9rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1;
+  }
+  .studio-name em { font-style: italic; color: var(--accent); }
+
+  .tagline {
+    font-size: 0.67rem;
+    font-weight: 300;
+    color: var(--text-secondary);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-top: 0.2rem;
+  }
+
+  .header-right {
+    text-align: right;
+    font-size: 0.64rem;
+    color: var(--text-muted);
+    font-weight: 300;
+    letter-spacing: 0.04em;
+    line-height: 1.7;
+  }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 0.5rem;
+    margin-bottom: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    align-items: center;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.64rem;
+    font-weight: 500;
+    white-space: nowrap;
+    padding: 0.15rem 0;
+  }
+
+  .legend-swatch {
+    width: 8px; height: 8px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  .legend-item .phone {
+    font-weight: 300;
+    color: var(--text-muted);
+    font-size: 0.6rem;
+  }
+
+  .legend-sep {
+    color: var(--border-strong);
+    font-size: 0.7rem;
+    padding: 0 0.1rem;
+    user-select: none;
+  }
+
+  .grid-wrapper {
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .day-headers {
+    display: grid;
+    grid-template-columns: 52px repeat(7, 1fr);
+    background: var(--header-bg);
+  }
+
+  .day-header {
+    text-align: center;
+    padding: 0.55rem 0.3rem;
+    font-size: 0.63rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.85);
+    border-right: 1px solid rgba(255,255,255,0.07);
+  }
+  .day-header:last-child { border-right: none; }
+
+  .time-row {
+    display: grid;
+    grid-template-columns: 52px repeat(7, 1fr);
+    border-bottom: 1px solid var(--border);
+    min-height: 50px;
+  }
+  .time-row:last-child { border-bottom: none; }
+  .time-row:nth-child(even) { background: #fafbfc; }
+
+  .time-label {
+    font-size: 0.56rem;
+    color: var(--text-muted);
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    padding: 0.35rem 0.4rem 0 0.5rem;
+    border-right: 1px solid var(--border-strong);
+    background: var(--surface);
+    display: flex;
+    align-items: flex-start;
+  }
+
+  .cell {
+    border-right: 1px solid var(--border);
+    padding: 0.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+  .cell:last-child { border-right: none; }
+
+  .class-card {
+    border-radius: 4px;
+    padding: 0.2rem 0.3rem 0.2rem 0.48rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.02rem;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid transparent;
+    transition: box-shadow 0.12s;
+    cursor: default;
+    flex: 1;
+  }
+  .class-card:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border-color: rgba(0,0,0,0.07);
+    z-index: 2;
+  }
+  .class-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+  }
+
+  .class-time { font-size: 0.52rem; font-weight: 500; opacity: 0.55; letter-spacing: 0.04em; }
+
+  .class-header {
+    display: flex;
+    align-items: center;
+    gap: 0.28rem;
+  }
+
+  .class-icon {
+    width: 13px; height: 13px;
+    flex-shrink: 0;
+    opacity: 0.7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .class-icon svg {
+    width: 13px; height: 13px;
+    fill: currentColor;
+    stroke: none;
+  }
+
+  .class-instructor { font-size: 0.59rem; font-weight: 600; }
+  .class-name       { font-size: 0.57rem; font-weight: 300; line-height: 1.25; opacity: 0.85; }
+
+  .helen  { background: var(--helen-bg);  color: var(--helen-fg);  }
+  .helen::before  { background: var(--helen-fg);  }
+  .sophie { background: var(--sophie-bg); color: var(--sophie-fg); }
+  .sophie::before { background: var(--sophie-fg); }
+  .lydia  { background: var(--lydia-bg);  color: var(--lydia-fg);  }
+  .lydia::before  { background: var(--lydia-fg);  }
+  .zoe    { background: var(--zoe-bg);    color: var(--zoe-fg);    }
+  .zoe::before    { background: var(--zoe-fg);    }
+  .aimee  { background: var(--aimee-bg);  color: var(--aimee-fg);  }
+  .aimee::before  { background: var(--aimee-fg);  }
+  .katie  { background: var(--katie-bg);  color: var(--katie-fg);  }
+  .katie::before  { background: var(--katie-fg);  }
+  .fiona  { background: var(--fiona-bg);  color: var(--fiona-fg);  }
+  .fiona::before  { background: var(--fiona-fg);  }
+
+  footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.65rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.59rem;
+    color: var(--text-muted);
+    font-weight: 300;
+    letter-spacing: 0.04em;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- ── SVG icon sprites ── -->
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Yoga: seated meditation pose -->
+  <symbol id="icon-yoga" viewBox="0 0 24 24">
+    <circle cx="12" cy="3.5" r="1.5"/>
+    <path d="M12 6c-1.2 2-3.5 3.2-5 3.8l.8 1.5c1-.4 2-.9 2.8-1.5L9.5 14H7l-.5 2h3l.5-2.5 1 3.5H9l-.5 2h3.5l1-3.5 1 3.5H17l-.5-2h-2l1-3.5.5 2.5h3l-.5-2h-2.5L14.4 9.8c.8.6 1.8 1.1 2.8 1.5l.8-1.5C16.5 9.2 13.2 8 12 6z"/>
+  </symbol>
+
+  <!-- Pilates reformer: figure lying on reformer -->
+  <symbol id="icon-pilates" viewBox="0 0 24 24">
+    <circle cx="17" cy="5.5" r="1.5"/>
+    <path d="M2 14h20v1.5H2zM2 15.5h2v2H2zM20 15.5h2v2h-2z"/>
+    <path d="M13 10.5c-1 0-2 .4-2.7 1.1L8 14h8.5l-1-2.5c-.4-.6-1.4-1-2.5-1z"/>
+    <path d="M16.5 9l1 3.5"/>
+  </symbol>
+
+  <!-- Dumbbell / fitness -->
+  <symbol id="icon-dumbbell" viewBox="0 0 24 24">
+    <rect x="1.5" y="10" width="3" height="4" rx="1"/>
+    <rect x="5.5" y="8" width="2" height="8" rx="1"/>
+    <rect x="7.5" y="11" width="9" height="2" rx="0.5"/>
+    <rect x="16.5" y="8" width="2" height="8" rx="1"/>
+    <rect x="19.5" y="10" width="3" height="4" rx="1"/>
+  </symbol>
+
+  <!-- Stretch: standing forward bend -->
+  <symbol id="icon-stretch" viewBox="0 0 24 24">
+    <circle cx="12" cy="3.5" r="1.5"/>
+    <path d="M12 5.5c0 0-1 4-4 6l1 1.5c1.5-1 2.8-2.5 3-4 .2 1.5 1.5 3 3 4l1-1.5c-3-2-4-6-4-6z"/>
+    <path d="M9 13l-3 5h2l2-3.5L9 13zM15 13l3 5h-2l-2-3.5L15 13z"/>
+  </symbol>
+
+  <!-- Yin yoga: reclining figure -->
+  <symbol id="icon-yin" viewBox="0 0 24 24">
+    <circle cx="7" cy="6" r="1.5"/>
+    <path d="M5 8.5c-.5 1-.5 2 0 3l2 1 2-1c.5-1 .5-2 0-3H5z"/>
+    <path d="M3 13h18v1H3z"/>
+    <path d="M7 14v3M12 14v3M17 14v3"/>
+    <circle cx="17" cy="6" r="1.5"/>
+    <path d="M19 8.5c.5 1 .5 2 0 3l-2 1-2-1c-.5-1-.5-2 0-3h4z"/>
+  </symbol>
+
+  <!-- Vinyasa: warrior pose / flowing movement -->
+  <symbol id="icon-vinyasa" viewBox="0 0 24 24">
+    <circle cx="12" cy="3.5" r="1.5"/>
+    <path d="M12 5.5l-3 3.5 3 1 3-1-3-3.5z"/>
+    <path d="M9 9l-4 3 1 1 4-2M15 9l4 3-1 1-4-2"/>
+    <path d="M12 10v5M10 15l-1.5 3.5h1.5L12 15M14 15l1.5 3.5h-1.5L12 15"/>
+  </symbol>
+
+  <!-- Clinical / medical cross -->
+  <symbol id="icon-clinical" viewBox="0 0 24 24">
+    <circle cx="12" cy="4" r="1.5"/>
+    <path d="M12 6v4M10 8h4"/>
+    <path d="M8 12c0-2.2 1.8-4 4-4s4 1.8 4 4v1H8v-1z"/>
+    <path d="M9 13v4h6v-4"/>
+    <path d="M10 17v2M14 17v2"/>
+    <!-- cross badge -->
+    <rect x="14.5" y="2" width="6" height="6" rx="1" fill="currentColor" opacity="0.15"/>
+    <path d="M16.5 5h2M17.5 4v2" stroke="currentColor" stroke-width="1.2" fill="none"/>
+  </symbol>
+
+  <!-- Post-natal: mother and baby silhouette -->
+  <symbol id="icon-postnatal" viewBox="0 0 24 24">
+    <circle cx="9" cy="3.5" r="1.5"/>
+    <path d="M7 6c-.8 1-1 2.5-.5 3.5l1 .5v4h3V10l1-.5C12 8.5 11.8 7 11 6H7z"/>
+    <path d="M8 14v4.5M10 14v4.5"/>
+    <circle cx="16" cy="7" r="1.2"/>
+    <path d="M14.5 9.5c0-1 .7-1.8 1.5-1.8s1.5.8 1.5 1.8v2h-3v-2z"/>
+    <path d="M15 11.5v3.5M17 11.5v3.5"/>
+  </symbol>
+
+  <!-- Group PT / people -->
+  <symbol id="icon-grouppt" viewBox="0 0 24 24">
+    <circle cx="7" cy="4" r="1.5"/>
+    <circle cx="17" cy="4" r="1.5"/>
+    <circle cx="12" cy="3.5" r="1.5"/>
+    <path d="M5 7c-.8.8-1 2-1 3h6c0-1-.2-2.2-1-3H5z"/>
+    <path d="M15 7c-.8.8-1 2-1 3h6c0-1-.2-2.2-1-3h-4z"/>
+    <path d="M10 7c-.8.8-1 2-1 3h6c0-1-.2-2.2-1-3h-4z"/>
+    <path d="M6 10v6M8 10v6M16 10v6M18 10v6M11 10v6M13 10v6"/>
+  </symbol>
+
+  <!-- Senior yoga: gentle seated figure -->
+  <symbol id="icon-senior" viewBox="0 0 24 24">
+    <circle cx="12" cy="3.5" r="1.5"/>
+    <!-- cane -->
+    <path d="M16 8c0 0 1 4 0 8" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+    <path d="M14.5 16c.5.5 1.5.5 2 0"/>
+    <path d="M8 7c-.5 1.5 0 3.5 1 5H14c1-1.5 1.5-3.5 1-5H8z"/>
+    <path d="M9 12v5M13 12v5"/>
+    <path d="M7.5 8.5L5 10M16.5 8.5L19 10"/>
+  </symbol>
+</svg>
+
+  <header>
+    <div>
+      <div class="studio-name">Studio <em>Schedule</em></div>
+      <div class="tagline">Weekly Class Timetable</div>
+    </div>
+    <div class="header-right">
+      All classes subject to change<br>
+      Contact your instructor to book
+    </div>
+  </header>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--helen-fg)"></div>Helen <span class="phone">07811 346547</span></div>
+    <span class="legend-sep">|</span>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--sophie-fg)"></div>Sophie <span class="phone">07787 412976</span></div>
+    <span class="legend-sep">|</span>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--lydia-fg)"></div>Lydia <span class="phone">07414 720022</span></div>
+    <span class="legend-sep">|</span>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--zoe-fg)"></div>Zoe <span class="phone">07539 386040</span></div>
+    <span class="legend-sep">|</span>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--aimee-fg)"></div>Aimee <span class="phone">07843 447544</span></div>
+    <span class="legend-sep">|</span>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--katie-fg)"></div>Katie <span class="phone">07787 170672</span></div>
+    <span class="legend-sep">|</span>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--fiona-fg)"></div>Fiona <span class="phone">07875 146587</span></div>
+  </div>
+
+  <div class="grid-wrapper">
+    <div class="day-headers">
+      <div class="day-header"></div>
+      <div class="day-header">Monday</div>
+      <div class="day-header">Tuesday</div>
+      <div class="day-header">Wednesday</div>
+      <div class="day-header">Thursday</div>
+      <div class="day-header">Friday</div>
+      <div class="day-header">Saturday</div>
+      <div class="day-header">Sunday</div>
+    </div>
+
+    <!-- helper macro: each class-card uses an inline SVG <use> referencing the sprite -->
+
+    <div class="time-row">
+      <div class="time-label">07:00</div>
+      <div class="cell"></div><div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+    </div>
+
+    <div class="time-row">
+      <div class="time-label">08:00</div>
+      <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+      <div class="cell"><div class="class-card sophie"><span class="class-time">08:00</span><div class="class-header"><span class="class-icon"><svg viewBox="0 0 24 24"><use href="#icon-yoga"/></svg></span><span class="class-instructor">Sophie</span></div><span class="class-name">Yoga 1:1</span></div></div>
+      <div class="cell"><div class="class-card fiona"><span class="class-time">08:00</span><div class="class-header"><span class="class-icon"><svg viewBox="0 0 24 24"><use href="#icon-pilates"/></svg></span><span class="class-instructor">Fiona</span></div><span class="class-name">Mat Pilates</span></div></div>
+      <div class="cell"></div>
+    </div>
+
+    <div class="time-row">
+      <div class="time-label">09:00</div>
+      <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+      <div class="cell"><div class="class-card katie"><span class="class-time">09:30</span><div class="class-header"><span class="class-icon"><svg viewBox="0 0 24 24"><use href="#icon-dumbbell"/></svg></span><span class="class-instructor">Katie</span></div><span class="class-name">Bands and Balance</span></div></div>
+      <div class="cell"><div class="class-card fiona"><span class="class-time">09:00</span><div class="class-header"><span class="class-icon"><svg viewBox="0 0 24 24"><use href="#icon-pilates"/></svg></span><span class="class-instructor">Fiona</span></div><span class="class-name">Mat Pilates</span></div></div>
+      <div class="cell"></div>
+    </div>
+
+    <div class="time-row">
+      <div class="time-label">10:00</div>
+      <div class="cell"><div class="class-card helen"><span class="class-time">10:00</span><div class="class-header"><span class="class-icon"><svg viewBox="0 0 24 24"><use href="#icon-clinical"/></svg></span><span class="class-instructor">Helen</span></div><span class="class-name">Clinical Pilates</span></div></div>
+      <div class="cell"><div class="class-card aimee"><span class="class-time">10:00</span><div class="class-header"><span class="class-icon"><svg viewBox="0 0 24 24"><use href="#icon-senior"/></svg></span><span class="class-instructor">Aimee</span></div><span class="class-name">Senior Yoga</span></div></div>
+      <div class="cell"></div>
+      <div class="cell"><div class="class-card helen"><span class="class-time">10:00</span><div class="class-header"><span class="class-icon"><svg viewBox="0 0 24 24"><use href="#icon-clinical"/></svg></span><span class="class-instructor">Helen</span></div><span class="class-name">Clinical Pilates</span></div></div>
+      <div class="cell"></div><div class="cell"></div>
+      <div class="cell"><div class="class-card zoe"><span class="class-time">10:00</span><div class="class-header"><span class="class-icon"><svg viewBox="0 0 24 24"><use href="#icon-yin"/></svg></span><span class="class-instructor">Zoe</span></div><span class="class-name">Yin Yoga</span></div></div>
+    </div>
+
+    <div class="time-row">
+      <div class="time-label">11:00</div>
+      <div class="cell"><div class="class-card sophie"><span class="class-time">11:15</span><div class="class-header"><span class="class-icon"><svg viewBox="0 0 24 24"><use href="#icon-grouppt"/></svg></span><span class="class-instructor">Sophie</span></div><span class="class-name">Fit (Group PT)</span></div></div>
+      <div class="cell"><div class="class-card lydia"><span class="class-time">11:30</span><div class="class-header"><span class="class-icon"><svg viewBox="0 0 24 24"><use href="#icon-pilates"/></svg></span><span class="class-instructor">Lydia</span></div><span class="class-name">Reformer Pilates</span></div></div><div class="cell"></div><div class="cell"></div>
+      <div class="cell"><div class="class-card sophie"><span class="class-time">11:15</span><div class="class-header"><span class="class-icon"><svg viewBox="0 0 24 24"><use href="#icon-grouppt"/></svg></span><span class="class-instructor">Sophie</span></div><span class="class-name">Fit (Group PT)</span></div></div>
+      <div class="cell"></div><div class="cell"></div>
+    </div>
+
+    <div class="time-row">
+      <div class="time-label">12:00</div>
+      <div class="cell"><div class="class-card sophie"><span class="class-time">12:30</span><div class="class-header"><span class="class-icon"><svg viewBox="0 0 24 24"><use href="#icon-yoga"/></svg></span><span class="class-instructor">Sophie</span></div><span class="class-name">Yoga</span></div></div>
+      <div class="cell"></div>
+      <div class="cell"><div class="class-card helen"><span class="class-time">12:00</span><div class="class-header"><span class="class-icon"><svg viewBox="0 0 24 24"><use href="#icon-clinical"/></svg></span><span class="class-instructor">Helen</span></div><span class="class-name">Clinical Pilates</span></div></div>
+      <div class="cell"><div class="class-card sophie"><span class="class-time">12:00</span><div class="class-header"><span class="class-icon"><svg viewBox="0 0 24 24"><use href="#icon-yoga"/></svg></span><span class="class-instructor">Sophie</span></div><span class="class-name">Yoga</span></div></div>
+      <div class="cell"></div>
+      <div class="cell"></div><div class="cell"></div>
+    </div>
+
+    <div class="time-row">
+      <div class="time-label">13:00</div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+    </div>
+
+    <div class="time-row">
+      <div class="time-label">14:00</div>
+      <div class="cell"><div class="class-card helen"><span class="class-time">14:15</span><div class="class-header"><span class="class-icon"><svg viewBox="0 0 24 24"><use href="#icon-clinical"/></svg></span><span class="class-instructor">Helen</span></div><span class="class-name">Clinical Pilates</span></div></div>
+      <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+    </div>
+
+    <div class="time-row">
+      <div class="time-label">15:00</div>
+      <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+      <div class="cell"><div class="class-card lydia"><span class="class-time">15:00</span><div class="class-header"><span class="class-icon"><svg viewBox="0 0 24 24"><use href="#icon-pilates"/></svg></span><span class="class-instructor">Lydia</span></div><span class="class-name">Mat Pilates 2:1</span></div></div>
+      <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+    </div>
+
+    <div class="time-row">
+      <div class="time-label">16:00</div>
+      <div class="cell"></div>
+      <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+      <div class="cell"><div class="class-card lydia"><span class="class-time">16:30</span><div class="class-header"><span class="class-icon"><svg viewBox="0 0 24 24"><use href="#icon-pilates"/></svg></span><span class="class-instructor">Lydia</span></div><span class="class-name">Mat Pilates 2:1</span></div></div>
+      <div class="cell"></div><div class="cell"></div>
+    </div>
+
+    <div class="time-row">
+      <div class="time-label">17:00</div>
+      <div class="cell"></div>
+      <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+    </div>
+
+    <div class="time-row">
+      <div class="time-label">18:00</div>
+      <div class="cell"><div class="class-card zoe"><span class="class-time">18:30</span><div class="class-header"><span class="class-icon"><svg viewBox="0 0 24 24"><use href="#icon-vinyasa"/></svg></span><span class="class-instructor">Zoe</span></div><span class="class-name">Vinyasa Yoga</span></div></div>
+      <div class="cell"><div class="class-card helen"><span class="class-time">18:00</span><div class="class-header"><span class="class-icon"><svg viewBox="0 0 24 24"><use href="#icon-clinical"/></svg></span><span class="class-instructor">Helen</span></div><span class="class-name">Clinical Pilates</span></div></div>
+      <div class="cell"></div>
+      <div class="cell"><div class="class-card sophie"><span class="class-time">18:00</span><div class="class-header"><span class="class-icon"><svg viewBox="0 0 24 24"><use href="#icon-yoga"/></svg></span><span class="class-instructor">Sophie</span></div><span class="class-name">Yoga</span></div></div>
+      <div class="cell"><div class="class-card lydia"><span class="class-time">18:00</span><div class="class-header"><span class="class-icon"><svg viewBox="0 0 24 24"><use href="#icon-stretch"/></svg></span><span class="class-instructor">Lydia</span></div><span class="class-name">Stretch</span></div></div>
+      <div class="cell"></div><div class="cell"></div>
+    </div>
+
+    <div class="time-row">
+      <div class="time-label">19:00</div>
+      <div class="cell"><div class="class-card sophie"><span class="class-time">19:30</span><div class="class-header"><span class="class-icon"><svg viewBox="0 0 24 24"><use href="#icon-yoga"/></svg></span><span class="class-instructor">Sophie</span></div><span class="class-name">Guyoga (men only)</span></div></div>
+      <div class="cell"><div class="class-card sophie"><span class="class-time">19:30</span><div class="class-header"><span class="class-icon"><svg viewBox="0 0 24 24"><use href="#icon-yoga"/></svg></span><span class="class-instructor">Sophie</span></div><span class="class-name">Guyoga (men only)</span></div></div>
+      <div class="cell"><div class="class-card sophie"><span class="class-time">19:30</span><div class="class-header"><span class="class-icon"><svg viewBox="0 0 24 24"><use href="#icon-yoga"/></svg></span><span class="class-instructor">Sophie</span></div><span class="class-name">Guyoga (men only)</span></div></div>
+      <div class="cell"><div class="class-card sophie"><span class="class-time">19:15</span><div class="class-header"><span class="class-icon"><svg viewBox="0 0 24 24"><use href="#icon-yoga"/></svg></span><span class="class-instructor">Sophie</span></div><span class="class-name">Guyoga (men only)</span></div></div>
+      <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+    </div>
+
+  </div>
+
+  <footer>
+    <span>Timetable may change without notice</span>
+    <span>Please contact your instructor directly to book</span>
+  </footer>
+
+</div>
+</body>
+</html>
